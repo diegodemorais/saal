@@ -1,6 +1,8 @@
 package br.com.oyster.model;
 
+import java.math.RoundingMode;
 import java.security.InvalidParameterException;
+import java.text.DecimalFormat;
 
 public class Card {
     private final String code;
@@ -17,6 +19,12 @@ public class Card {
 
     public Double getBalance() {
         return this.balance;
+    }
+    
+    public String getBalanceFormatted() {
+    	DecimalFormat df = new DecimalFormat("#.##");
+    	df.setRoundingMode(RoundingMode.CEILING);
+    	return df.format(this.getBalance());
     }
 
     public Double loadMoney(Double money) throws InvalidParameterException {

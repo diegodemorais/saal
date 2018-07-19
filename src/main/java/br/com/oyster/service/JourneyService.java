@@ -13,7 +13,7 @@ public interface JourneyService {
 	
 	boolean takeTripByBus(Card card, Region from, Region to);
 	void takeTripByTube(Card card, Region from, Region to);
-	void printTrips(Card card);
+	String tripsToString(Card card);
 	
 	double calculateFare(List<Trip> trips);
 

@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.springframework.stereotype.Component;
 
 import br.com.oyster.model.Card;
-import br.com.oyster.model.Region;
 import br.com.oyster.model.Trip;
 
 @Component

@@ -10,7 +10,6 @@ import br.com.oyster.model.Region;
 import br.com.oyster.model.Station;
 import br.com.oyster.model.Trip;
 import br.com.oyster.model.Trip.TransportType;
-import br.com.oyster.repository.CardRepository;
 import br.com.oyster.repository.JourneyRepository;
 import br.com.oyster.service.JourneyService;
 
@@ -21,14 +20,14 @@ public class JourneyServiceImpl implements JourneyService{
     private final JourneyRepository journeyRepository;
 	
 	// Fares
-	private static final Double MAX = 3.20d;
-	private static final Double IN_ZONE1 = 2.50d;
-	private static final Double OUT_ZONE1 = 2.00d;
-	private static final Double TWO_WITH_ZONE1 = 3.00d;
-	private static final Double TWO_WITHOUT_ZONE1 = 2.25d;
-	private static final Double THREE_ZONES = 3.20d;
-	private static final Double BUS = 3.20d;
-	private static final Double NONE = 0d;
+	public static final Double MAX = 3.20d;
+	public static final Double IN_ZONE1 = 2.50d;
+	public static final Double OUT_ZONE1 = 2.00d;
+	public static final Double TWO_WITH_ZONE1 = 3.00d;
+	public static final Double TWO_WITHOUT_ZONE1 = 2.25d;
+	public static final Double THREE_ZONES = 3.20d;
+	public static final Double BUS = 3.20d;
+	public static final Double NONE = 0d;
 	
 	@Autowired
 	public JourneyServiceImpl(JourneyRepository journeyRepository) {
@@ -48,7 +47,8 @@ public class JourneyServiceImpl implements JourneyService{
 	@Override
 	public void exitStation(Card card) {
 		double fare = calculateFare(journeyRepository.discountTrips(card));
-		card.loadMoney(fare);
+		card.loadMoney(MAX);
+		card.chargeFare(fare);
 	}
 
 	@Override
@@ -68,17 +68,19 @@ public class JourneyServiceImpl implements JourneyService{
 	}
 	
 	@Override
-	public void printTrips(Card card) {
+	public String tripsToString(Card card) {
+		StringBuilder tripsStr = new StringBuilder();
 		List<Trip> trips = journeyRepository.getTrips(card);
 		if (trips == null ) {
-			System.out.println("No trip done on this card.");
-			return;
+			tripsStr.append("No trip done on this card.");
+			return tripsStr.toString();
 		}
 		for(Trip trip : trips){
-			System.out.println(trip.getTransportType() == TransportType.BUS ? "Bus" : "Tube");
-			System.out.println(" from " + trip.getFrom().getName() 
-					+ " to" + trip.getTo().getName());
+			tripsStr.append(trip.getTransportType() == TransportType.BUS ? "Bus" : "Tube")
+					.append(" from " + trip.getFrom().getName())
+					.append(" to " + trip.getTo().getName() + System.lineSeparator());
 		}
+		return tripsStr.toString();
 	}
 
 	@Override
@@ -94,19 +96,18 @@ public class JourneyServiceImpl implements JourneyService{
 				if (toZone == 1) {
 					zone1 = true;
 				}
-				zonesQuantity += fromZone > toZone ? fromZone - toZone : toZone - fromZone;	
+				zonesQuantity += fromZone > toZone ? fromZone - toZone : toZone - fromZone;
 			} catch (Exception e) {
 				System.err.println("Error on cast. Why is a instance of Region here?");
 				return NONE;
 			}
-			switch (zonesQuantity) {
-				case 0: return NONE;
-				case 1: return zone1 ? IN_ZONE1 : OUT_ZONE1;
-				case 2: return zone1 ? TWO_WITH_ZONE1 : TWO_WITHOUT_ZONE1;
-				case 3: default: return THREE_ZONES;
-			}
 		}
-		return NONE; 
+		switch (zonesQuantity) {
+			case 0: 
+			case 1: return zone1 ? IN_ZONE1 : OUT_ZONE1;
+			case 2: return zone1 ? TWO_WITH_ZONE1 : TWO_WITHOUT_ZONE1;
+			case 3: default: return THREE_ZONES;
+		}
 	}
 
 }
